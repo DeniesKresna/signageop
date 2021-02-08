@@ -81,6 +81,7 @@
 		        :color="device.online == 'on'? 'green':'pink'"
 		      >
 		            <v-img
+						class="cursormode"
 			            height="70"
 			            width="70"
 			            :src="apiUrl + 'public/img/device_types/' + device.device_type_name + '.png'"
@@ -116,7 +117,7 @@
       </v-row>
       <v-row>
       	<v-col>
-      		<span class="body-2" @click="showDialog(device)">{{device.imei}}</span><br />
+      		<span class="body-2 cursormode" @click="showDialog(device)">{{device.imei}}</span><br />
       		<span class="caption deep-purple--text">online {{moment(device.last_online).fromNow()}}</span>
       	</v-col>
       </v-row>
@@ -146,121 +147,136 @@
       width="700"
     >
       <v-card>
-		<v-system-bar color="grey">
-		<v-spacer></v-spacer>
+		<v-system-bar color="blue darken-3 pr-0" window dark>
+			DEVICE DETAIL
+			<v-spacer></v-spacer>
 		<!--
 			<v-icon>mdi-window-minimize</v-icon>
 			<v-icon>mdi-window-maximize</v-icon>
 		-->
-			<v-icon @click="closeDialog">mdi-close</v-icon>
+			<v-btn color="red" dark @click="closeDialog">
+				<v-icon>mdi-close</v-icon>
+			</v-btn>
 		</v-system-bar>
 
-        <v-card-title class="headline grey lighten-2">
-          Device Information
-        </v-card-title>
+        <!--<v-card-title class="headline grey lighten-2">
+          Device Detail
+        </v-card-title>-->
 
-        <v-card-text>
-          <v-row>
-			  	<v-col cols="12">
-				  	<div class="subtitle-1">
-						  Name: {{device.device_name}} ({{device.imei}})<br />
-					</div>
-				</v-col>
-			  	<v-col cols="12" v-if="device_device_type == 'led'">
-				  	<div class="subtitle-2">
-						  Driver: {{device.driver_name}} ({{device.driver_phone}})<br />
-					</div>
-					<div class="subtitle-2">
-						  Detail: {{device.car_type}} ({{device.plate_number}})
-					</div>
-				</v-col>
-			  	<v-col cols="12" v-else>
-				  	<div class="subtitle-2">
-						  Merchant: {{device.merchant_name}} ({{device.merchant_phone}})<br />
-					</div>
-				</v-col>
-				<!----------------------------- Campaign Data ------------------------------------>
-				<v-col cols="12">
-				  	<v-btn small color="green" @click="getDeviceCampaignData()">
-						Last Reported Campaign
-					</v-btn>
-				</v-col>
-				<v-col cols="12" v-if="device_campaign_data != null">
-					<div class="subtitle-2">
-						<p>Content: {{device_campaign_data.content_name}}</p>
-						<video width="400" controls>
-							<source :src="device_campaign_data.file_url" type="video/mp4">
-							Your browser does not support HTML video.
-						</video>
-						<p><span v-if="device_campaign_data.campaign_name != null">Campaign: {{device_campaign_data.campaign_name}}</span>
-						<span v-else>Guaranteed: {{device_campaign_data.guaranteed_name}}</span></p>
-						<span class="deep-purple--text">played {{moment(device_campaign_data.play_start_time).fromNow()}}</span>
-					</div>
-				</v-col>
-				<v-col cols="12" v-if="campaignWarning">
-					<div class="caption red--text">
-						  no campaign data detected last 5 minutes
-					</div>
-				</v-col>
-				<hr />
-				<!----------------------------- Geo Data ------------------------------------>
-				<v-col cols="12">
-				  	<v-btn small color="warning" @click="getDeviceGeoData()">
-						Last Reported Location
-					</v-btn>
-				</v-col>
-				<v-col cols="12" v-if="device_geo_datas.length > 0">
-				  	<l-map style="height: 350px" :zoom="16" :center="device_center">
-						<l-tile-layer :url="'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'"></l-tile-layer>
-						<div v-for="(geo, index) in device_geo_datas" :key="geo.play_start_time">
-							<div v-if="index==0">
-								<div v-if="checkDeviceOnline(geo.play_start_time)">
-									<l-marker :lat-lng="[geo.lat, geo.lng]" :icon="lastIconOnline"><l-tooltip>{{geo.play_start_time}}</l-tooltip></l-marker>
-								</div>
-								<div v-else>
-									<l-marker :lat-lng="[geo.lat, geo.lng]" :icon="lastIconOffline"><l-tooltip>{{geo.play_start_time}}</l-tooltip></l-marker>
-								</div>
+		<v-tabs v-model="tab" >
+          	<v-tabs-slider color="blue"></v-tabs-slider>
+			<!-- TAB ONE -->
+          	<v-tab href="#info">Info</v-tab>
+			<v-tab-item id="info" key="info">
+				<v-card-text>
+					<v-row>
+						<v-col cols="12">
+							<div class="subtitle-1">
+								Name: {{device.device_name}} ({{device.imei}})<br />
 							</div>
-							<div v-else>
-								<l-marker :lat-lng="[geo.lat, geo.lng]" :icon="iconHistory"><l-tooltip>{{geo.play_start_time}}</l-tooltip></l-marker>
+						</v-col>
+						<v-col cols="12" v-if="device_device_type == 'led'">
+							<div class="subtitle-2">
+								Driver: {{device.driver_name}} ({{device.driver_phone}})<br />
 							</div>
-						</div>
-					</l-map>
-				</v-col>
-				<v-col cols="12" v-if="geoWarning">
-					<div class="caption red--text">
-						  device last lat and lon is 0
-					</div>
-				</v-col>
-		  </v-row>
-        </v-card-text>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-		  <v-btn
-            color="warning"
-            text
-            @click="changeStatus('download')"
-          >
-            REDOWNLOAD
-          </v-btn>
-		  <v-btn
-            color="default"
-            text
-            @click="changeStatus('restart')"
-          >
-            RESTART
-          </v-btn>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="primary"
-            text
-            @click="closeDialog"
-          >
-            CLOSE
-          </v-btn>
-        </v-card-actions>
+							<div class="subtitle-2">
+								Detail: {{device.car_type}} ({{device.plate_number}})
+							</div>
+						</v-col>
+						<v-col cols="12" v-else>
+							<div class="subtitle-2">
+								Merchant: {{device.merchant_name}} ({{device.merchant_phone}})<br />
+							</div>
+						</v-col>
+						<!----------------------------- Campaign Data ------------------------------------>
+						<v-col cols="12">
+							<v-btn small color="green" @click="getDeviceCampaignData()">
+								Last Reported Campaign
+							</v-btn>
+						</v-col>
+						<v-col cols="12" v-if="device_campaign_data != null">
+							<div class="subtitle-2">
+								<p>Content: {{device_campaign_data.content_name}}</p>
+								<video width="400" controls>
+									<source :src="device_campaign_data.file_url" type="video/mp4">
+									Your browser does not support HTML video.
+								</video>
+								<p><span v-if="device_campaign_data.campaign_name != null">Campaign: {{device_campaign_data.campaign_name}}</span>
+								<span v-else>Guaranteed: {{device_campaign_data.guaranteed_name}}</span></p>
+								<span class="deep-purple--text">played {{moment(device_campaign_data.play_start_time).fromNow()}}</span>
+							</div>
+						</v-col>
+						<v-col cols="12" v-if="campaignWarning">
+							<div class="caption red--text">
+								no campaign data detected last 5 minutes
+							</div>
+						</v-col>
+						<hr />
+						<!----------------------------- Geo Data ------------------------------------>
+						<v-col cols="12">
+							<v-btn small color="warning" @click="getDeviceGeoData()">
+								Last Reported Location
+							</v-btn>
+						</v-col>
+						<v-col cols="12" v-if="device_geo_datas.length > 0">
+							<l-map style="height: 350px" :zoom="16" :center="device_center">
+								<l-tile-layer :url="'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'"></l-tile-layer>
+								<div v-for="(geo, index) in device_geo_datas" :key="geo.play_start_time">
+									<div v-if="index==0">
+										<div v-if="checkDeviceOnline(geo.play_start_time)">
+											<l-marker :lat-lng="[geo.lat, geo.lng]" :icon="lastIconOnline"><l-tooltip>{{geo.play_start_time}}</l-tooltip></l-marker>
+										</div>
+										<div v-else>
+											<l-marker :lat-lng="[geo.lat, geo.lng]" :icon="lastIconOffline"><l-tooltip>{{geo.play_start_time}}</l-tooltip></l-marker>
+										</div>
+									</div>
+									<div v-else>
+										<l-marker :lat-lng="[geo.lat, geo.lng]" :icon="iconHistory"><l-tooltip>{{geo.play_start_time}}</l-tooltip></l-marker>
+									</div>
+								</div>
+							</l-map>
+						</v-col>
+						<v-col cols="12" v-if="geoWarning">
+							<div class="caption red--text">
+								device last lat and lon is 0
+							</div>
+						</v-col>
+					</v-row>
+				</v-card-text>
+			</v-tab-item>
+			<!-- TAB TWO -->
+			<v-tab href="#control">Control</v-tab>
+			<v-tab-item id="control" key="control">
+				<v-card-text class="pt-4">
+					<v-row justify="space-around">
+						<v-tooltip top>
+							<template v-slot:activator="{ on, attrs }">
+								<v-btn text v-bind="attrs" v-on="on" @click="changeStatus('download')">
+									<v-icon large color="green darken-2">mdi-download</v-icon>
+								</v-btn>
+							</template>
+							<span>Redownload Content</span>
+						</v-tooltip>
+						<v-tooltip top>
+							<template v-slot:activator="{ on, attrs }">
+								<v-btn text v-bind="attrs" v-on="on" @click="changeStatus('restart')">
+									<v-icon large color="blue darken-2">mdi-restart</v-icon>
+								</v-btn>
+							</template>
+							<span>Restart Device</span>
+						</v-tooltip>
+						<v-tooltip top>
+							<template v-slot:activator="{ on, attrs }">
+								<v-btn text v-bind="attrs" v-on="on" @click="goTo('https://api.signage.co.id/api/v1/device/listlayout?imei='+ device.imei +'&date='+new Date().toISOString().slice(0,10)+'&hour='+new Date().getHours())">
+									<v-icon large color="purple darken-2">mdi-calendar-month-outline</v-icon>
+								</v-btn>
+							</template>
+							<span>Schedule</span>
+						</v-tooltip>
+					</v-row>
+				</v-card-text>
+			</v-tab-item>
+        </v-tabs>
       </v-card>
     </v-dialog>
   </div>
@@ -273,6 +289,7 @@ var moment = require('moment');
 export default{
 	data(){
 		return {
+			tab: null,
 			moment: moment,
 			filter: {
 				imei: "",
@@ -407,6 +424,7 @@ export default{
 			this.dialog = false;
 			this.geoWarning = false;
 			this.campaignWarning = false;
+			this.tab = null;
 		},
 		changeStatus: async function(status){
 			if(confirm("Yakin akan melakukan " + status + " pada device ini?")){
@@ -416,6 +434,10 @@ export default{
 				}
 				let res = await this.$store.dispatch('device/operationalSetStatus', payload);
 			}
+		},
+		goTo: function(url){
+			var win = window.open(url, '_blank');
+  			win.focus();
 		}
 	},
 	computed: {
@@ -425,3 +447,8 @@ export default{
 	}
 }
 </script>
+<style scoped>
+.cursormode{
+	cursor: pointer;
+}
+</style>
