@@ -6,7 +6,7 @@ import Vue from 'vue';
 
 const api = axios.create({
  //baseURL: 'https://smartit-32ba08c9.localhost.run/pendaftaran-api/public/api',
- //baseURL: 'http://localhost:8080/signage/public/api/',
+ //baseURL: 'https://10.100.100.127/signage/public/api/',
  baseURL: 'https://api.signage.co.id/api/',
 });
 
@@ -31,7 +31,7 @@ api.interceptors.response.use(
     if (response.status === 200 || response.status === 201) {
       let msg = response.data.message;
       if(msg !== undefined){
-        Vue.swal('Berhasil!',msg,'success');
+        Vue.swal('Success!',msg,'success');
       }
       return Promise.resolve(response);
     } else {
@@ -46,7 +46,7 @@ error => {
     }
     else if(error.response.status === 450){
         let msg = error.response.data.message;
-        Vue.swal('Maaf',msg,'error');
+        Vue.swal('Sorry',msg,'error');
     }
     else if(error.response.status === 422){
         let renderhtml = "<ul>";
@@ -56,14 +56,14 @@ error => {
         }
         renderhtml += "</ul>";
         Vue.swal({
-            title: "Kesalahan Masukkan", 
+            title: "Wrong Input", 
             html: renderhtml,
             icon: "warning"
         });
     }
     else if(error.response.status === 500){
-        let msg = "Server mengalami permasalahan";
-        Vue.swal('Maaf',msg,'error');
+        let msg = "Server has some trouble";
+        Vue.swal('Sorry',msg,'error');
     }
     else if(error.response.status === 430){
         console.log(error.response.data)

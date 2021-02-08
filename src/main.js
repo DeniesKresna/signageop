@@ -6,6 +6,8 @@ import vuetify from './plugins/vuetify';
 import api from './plugins/api';
 import './registerServiceWorker'
 
+import 'leaflet/dist/leaflet.css';
+/*
 import firebase from "firebase/app";
 import 'firebase/messaging';
 
@@ -35,6 +37,7 @@ messaging.requestPermission().then(() => {
 }).catch((err) => {
   console.log('Unable to get permission to notify.', err);
 });
+*/
 
 Vue.config.productionTip = false
 

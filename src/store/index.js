@@ -7,6 +7,7 @@ Vue.use(Vuex);
 
 const state = {
   apiUrl: "https://api.signage.co.id/",
+  //apiUrl: "https://localhost/signage/",
   overlay: false,
   page: "",
   links: [],

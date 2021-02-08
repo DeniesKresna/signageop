@@ -17,6 +17,34 @@ const device = {
 	      });
 	    });
 	  },
+	  operationalShow({},payload){
+	    return new Promise((resolve, reject) => {
+	      api.get('v1/device/operational/'+payload.id).then(response => {
+	          resolve(response.data);
+	      });
+	    });
+	  },
+	  operationalGeoData({},payload){
+	    return new Promise((resolve, reject) => {
+	      api.get('v1/device/operational/geo-data/'+payload.id).then(response => {
+	          resolve(response.data);
+	      });
+	    });
+	  },
+	  operationalCampaignData({},payload){
+	    return new Promise((resolve, reject) => {
+	      api.get('v1/device/operational/campaign-data/'+payload.id).then(response => {
+	          resolve(response.data);
+	      });
+	    });
+	  },
+	  operationalSetStatus({},payload){
+	    return new Promise((resolve, reject) => {
+	      api.put('v1/device/operational/'+payload.id, payload).then(response => {
+	          resolve(response.data);
+	      });
+	    });
+	  },
 	},
 
 	getters: {
