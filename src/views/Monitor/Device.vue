@@ -107,8 +107,8 @@
 			    	mdi-monitor
 				</v-icon> <span class="text-caption">{{device.monitor}}</span>
 				<br />
-				<v-icon :color="getSignalIcon(device.net,'color')" size="small">
-			    	{{getSignalIcon(device.net,"icon")}}
+				<v-icon :color="getSignalIcon(device.net,'color',device.online)" size="small">
+			    	{{getSignalIcon(device.net,"icon",device.online)}}
 				</v-icon> <span class="text-caption">{{device.bandwidth}} {{device.bandwidth != null?"mb":""}}</span>
 				<!--
 			    <v-icon color="green" size="small">
@@ -436,23 +436,30 @@ export default{
 				let res = await this.$store.dispatch('device/operationalSetStatus', payload);
 			}
 		},
-		getSignalIcon: function(net,mode){
-			if(net == "4G" || net == "3G" || net == "2G" || net == "hspa" || net == "hspa-plus"){
-				if(mode == "icon")
-					return "mdi-signal-"+net.toLowerCase();
-				else{
-					if(net == "4G" || net == "3G")
-						return "green";
+		getSignalIcon: function(net,mode,online_status){
+			if(online_status == "on"){
+				if(net == "4G" || net == "3G" || net == "2G" || net == "hspa" || net == "hspa-plus"){
+					if(mode == "icon")
+						return "mdi-signal-"+net.toLowerCase();
+					else{
+						if(net == "4G" || net == "3G")
+							return "green";
+						else
+							return "yellow";
+					}
+				}else if(net == "WIFI"){
+					if(mode == "icon")
+						return "mdi-wifi";
 					else
-						return "yellow";
+						return "blue darken-2"
 				}
-			}else if(net == "WIFI"){
-				if(mode == "icon")
-					return "mdi-wifi";
-				else
-					return "blue darken-2"
-			}
-			else{
+				else{
+					if(mode == "icon")
+						return "mdi-signal-off";
+					else
+						return "red";
+				}
+			}else{
 				if(mode == "icon")
 					return "mdi-signal-off";
 				else
