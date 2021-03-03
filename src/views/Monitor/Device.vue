@@ -3,8 +3,8 @@
 <v-row>
 	<v-col cols="12" md="3">
 		<v-text-field
-			v-model="filter.imei"
-            label="Imei"
+			v-model="filter.search"
+            label="Search Name / Imei"
 			@keyup.enter="loadData(1)"
           ></v-text-field>
 	</v-col>
@@ -118,7 +118,7 @@
       </v-row>
       <v-row>
       	<v-col>
-      		<span class="body-2 cursormode" @click="showDialog(device)">{{device.imei}}</span><br />
+      		<span class="body-2 cursormode" @click="showDialog(device)">{{device.name}}</span><br />
       		<span class="caption deep-purple--text">online {{moment(device.last_online).fromNow()}}</span>
       	</v-col>
       </v-row>
@@ -212,7 +212,6 @@
 								no campaign data detected last 5 minutes
 							</div>
 						</v-col>
-						<hr />
 						<!----------------------------- Geo Data ------------------------------------>
 						<v-col cols="12">
 							<v-btn small color="warning" @click="getDeviceGeoData()">
@@ -240,6 +239,20 @@
 						<v-col cols="12" v-if="geoWarning">
 							<div class="caption red--text">
 								device last lat and lon is 0
+							</div>
+						</v-col>
+						<!----------------------------- Incident Data ------------------------------------>
+						<v-col cols="12">
+							<v-btn small color="blue" @click="getDeviceIncidentData()">
+								10 Last Reported Incident
+							</v-btn>
+						</v-col>
+						<v-col cols="12" v-if="device_incident_data.length > 0">
+							
+						</v-col>
+						<v-col cols="12" v-if="incidentWarning">
+							<div class="caption red--text">
+								no incident detected last 1 hour
 							</div>
 						</v-col>
 					</v-row>
@@ -293,7 +306,7 @@ export default{
 			tab: null,
 			moment: moment,
 			filter: {
-				imei: "",
+				search: "",
 				battery_max: 100,
 				device_type: "",
 				monitor: "",
@@ -323,9 +336,14 @@ export default{
 			geoWarning: false,
 			//=============
 
-			//maps=========
+			//campaign=========
 			device_campaign_data: null,
 			campaignWarning: false,
+			//=============
+
+			//incident=========
+			device_incident_data: [],
+			incidentWarning: false,
 			//=============
 
 			screen_types: [{text:'All',value:''},{text:'Led',value:'led'},{text:'Screen',value:'screen'}],
@@ -354,12 +372,12 @@ export default{
 	methods: {
 		loadData: async function(page=1){
 			this.pagination.page = page;
-			let imei = "";
-			if(this.filter.imei.trim() != ""){
-				imei = this.filter.imei.trim()
+			let search = "";
+			if(this.filter.search.trim() != ""){
+				search = this.filter.search.trim()
 			}
 
-			let qs = "?imei="+imei+"&battery_max="+this.filter.battery_max+"&device_type="+this.filter.device_type+"&monitor="+this.filter.monitor+"&online="+this.filter.online+"&page="+this.pagination.page;
+			let qs = "?search="+search+"&battery_max="+this.filter.battery_max+"&device_type="+this.filter.device_type+"&monitor="+this.filter.monitor+"&online="+this.filter.online+"&page="+this.pagination.page;
 			
 			let res = await this.$store.dispatch('device/operationalIndex',qs);
 			this.devices = res.data.data;
@@ -400,6 +418,17 @@ export default{
 				this.device_campaign_data = data;
 			}
 		},
+		
+		getDeviceIncidentData: async function(){
+			let res = await this.$store.dispatch('device/operationalIncidentData', this.device);
+			let datas = res.datas;
+			if(datas.length == 0 || datas == null){
+				this.incidentWarning = true;
+			}else{
+				this.incidentWarning = false;
+				this.device_incident_data = data;
+			}
+		},
 		checkDeviceOnline: function(tm){
 			let t1 = new Date();
 			let t2 = new Date(tm);
@@ -422,9 +451,11 @@ export default{
 			this.device_geo_datas = [];
 			this.device_center= [-7.273119, 112.742891];
 			this.device_campaign_data = null;
+			this.device_incident_warning = null;
 			this.dialog = false;
 			this.geoWarning = false;
 			this.campaignWarning = false;
+			this.incidentWarning = false;
 			this.tab = null;
 		},
 		changeStatus: async function(status){

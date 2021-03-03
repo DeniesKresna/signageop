@@ -12,7 +12,8 @@ const state = {
   page: "",
   links: [],
   user:null,
-  loginDialog:false
+  loginDialog:false,
+  version: "1.01"
 };
 
 const mutations = {
@@ -68,6 +69,13 @@ const actions = {
         if(obj.id != undefined)
           commit('setUser',response.data);
       })
+    });
+  },
+  operationalVersion(){
+    return new Promise((resolve, reject)=>{
+      api.get('v1/device/operational/version').then(response => {
+        resolve(response.data);
+      });
     });
   }
 };

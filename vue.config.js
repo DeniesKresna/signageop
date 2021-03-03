@@ -27,18 +27,18 @@ module.exports = {
     disableHostCheck: true,
     
     https: {
-          key: fs.readFileSync('./certs/kantor/key.pem'),
-          cert: fs.readFileSync('./certs/kantor/cert.pem'),
+          key: fs.readFileSync('./certs/rumah/key.pem'),
+          cert: fs.readFileSync('./certs/rumah/cert.pem'),
         },
     
     port: 3000,
     //public: "cobadenies.loca.lt",
     //host: "localhost"
     //office
-    public: 'https://10.100.100.127:3000/'
+    //public: 'https://10.100.100.127:3000/'
     
     //home
-    //public: 'https://192.168.100.28:3000/'
+    public: 'https://192.168.100.28:3000/'
     //public: 'https://cobadenies.loca.lt/'
   },
 }

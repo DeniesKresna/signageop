@@ -58,6 +58,34 @@
   
       <v-main>
         <v-overlay :value="overlay"></v-overlay>
+        <v-snackbar
+          :timeout=-1
+          v-model="snackbar"
+          absolute
+          left
+          shaped
+          top
+        >
+          You need update version of this app.
+          <template v-slot:action="{ attrs }">
+            <v-btn
+              color="blue"
+              text
+              v-bind="attrs"
+              @click="hardRefresh"
+            >
+              Update
+            </v-btn>
+            <v-btn
+              color="pink"
+              text
+              v-bind="attrs"
+              @click="snackbar = false"
+            >
+              Close
+            </v-btn>
+          </template>
+        </v-snackbar>
         <v-container
           fluid
         >
@@ -77,7 +105,7 @@
         color="red lighten-2"
         class="white--text"
       >
-        <span>Signage Quick Monitoring</span>
+        <span>Signage Quick Monitoring V{{version}}</span>
         <v-spacer></v-spacer>
         <span>&copy; {{ new Date().getFullYear() }}</span>
       </v-footer>
@@ -93,12 +121,33 @@ export default{
       drawerRight: null,
       right: false,
       left: false,
+      snackbar: false
+    }
+  },
+  mounted: async function(){
+    let res = await this.$store.dispatch("operationalVersion");
+    let version = res.data;
+    if(version != this.$store.state.version){
+      this.snackbar = true;
+    }
+  },
+  methods: {
+    hardRefresh: function(){
+      window.location.reload(true);
     }
   },
   computed: {
     overlay(){
       return this.$store.getters.overlay;
+    },
+    version(){
+      return this.$store.getters.version;
     }
   }
 }
 </script>
+<style scoped>
+.cursormode{
+	cursor: pointer;
+}
+</style>

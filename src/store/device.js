@@ -45,6 +45,13 @@ const device = {
 	      });
 	    });
 	  },
+	  operationalIncidentData({},payload){
+	    return new Promise((resolve, reject) => {
+	      api.get('v1/device/operational/incident-data/'+payload.id).then(response => {
+	          resolve(response.data);
+	      });
+	    });
+	  },
 	},
 
 	getters: {
