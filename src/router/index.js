@@ -7,8 +7,13 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'index',
+    name: 'device-quick-info',
     component: () => import('../views/Monitor/Device.vue')
+  },
+  {
+    path: '/device-online-time',
+    name: 'device-online-time',
+    component: () => import('../views/Monitor/DeviceOnlineTime.vue')
   }
 ]
 

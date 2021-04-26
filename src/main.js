@@ -7,37 +7,33 @@ import api from './plugins/api';
 import './registerServiceWorker'
 
 import 'leaflet/dist/leaflet.css';
-/*
-import firebase from "firebase/app";
-import 'firebase/messaging';
 
-firebase.initializeApp({
-	apiKey: "AIzaSyAoyRWhzAoIZoXERLxDQugXs0YT7PvmTQY",
-    authDomain: "signage-e34d0.firebaseapp.com",
-    databaseURL: "https://signage-e34d0.firebaseio.com",
-    projectId: "signage-e34d0",
-    storageBucket: "signage-e34d0.appspot.com",
-    messagingSenderId: "30195697440",
-    appId: "1:30195697440:web:c4970d0cb02043703d3945",
-    measurementId: "G-7QNLJKVQ7K"
-});
 
-const messaging = firebase.messaging();
+//for notification
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('firebase-messaging-sw.js')
+    .then(reg => {
+      console.log(`Service Worker Registration (Scope: ${reg.scope})`);
+    })
+    .catch(error => {
+      const msg = `Service Worker Error (${error})`;
+      console.error(msg);
+    });
+} else {
+  // happens when the app isn't served over HTTPS or if the browser doesn't support service workers
+  console.warn('Service Worker not available');
+}
 
-messaging.usePublicVapidKey("BOY5UBH9dbCVDVhZN1qno8OxGHb4FQjwae5Zr5Dire4Q8aZ2CAeCdYGl7abW1fz8jG5OV2W5Q7hH-CY9PGIxaa8"); // 1. Generate a new key pair
+import firebaseMessaging from './firebase'
 
-// Request Permission of Notifications
-messaging.requestPermission().then(() => {
-  console.log('Notification permission granted.');
+firebaseMessaging.getToken({vapidKey:"BOY5UBH9dbCVDVhZN1qno8OxGHb4FQjwae5Zr5Dire4Q8aZ2CAeCdYGl7abW1fz8jG5OV2W5Q7hH-CY9PGIxaa8"}).then((token) => {
+  store.dispatch('device/operationalFcmRegistration',{token: token}).then((data)=>{
+    //console.log(data.message);
+  });
+  console.log(token);
+})
 
-  // Get Token
-  messaging.getToken().then((token) => {
-    console.log(token)
-  })
-}).catch((err) => {
-  console.log('Unable to get permission to notify.', err);
-});
-*/
+Vue.prototype.$messaging = firebaseMessaging
 
 Vue.config.productionTip = false
 

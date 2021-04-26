@@ -6,7 +6,7 @@ import Vue from 'vue';
 
 const api = axios.create({
  //baseURL: 'https://smartit-32ba08c9.localhost.run/pendaftaran-api/public/api',
- //baseURL: 'https://10.100.100.127/signage/public/api/',
+ //baseURL: 'http://localhost:8080/signage/public/api/',
  baseURL: 'https://api.signage.co.id/api/',
 });
 

@@ -13,7 +13,8 @@ const state = {
   links: [],
   user:null,
   loginDialog:false,
-  version: "1.01"
+  activeMenu: "device-quick-info",
+  version: "1.081"
 };
 
 const mutations = {
@@ -45,6 +46,9 @@ const mutations = {
   setUser(state, payload){
     state.loginDialog = false;
     state.user = payload;
+  },
+  setActiveMenu(state, payload){
+    state.activeMenu = payload;
   },
   logout(state){
     state.user = null;
@@ -98,6 +102,15 @@ const getters = {
   },
   loginDialog(state){
     return state.loginDialog;
+  },
+  selectedMenu(state){
+    let selectedMenu = 0;
+    if(state.activeMenu=="device-quick-info"){
+      selectedMenu = 0;
+    }else{
+      selectedMenu = 1;
+    }
+    return selectedMenu;
   }
 };
 

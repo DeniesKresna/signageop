@@ -203,7 +203,9 @@
 									Your browser does not support HTML video.
 								</video>
 								<p><span v-if="device_campaign_data.campaign_name != null">Campaign: {{device_campaign_data.campaign_name}}</span>
-								<span v-else>Guaranteed: {{device_campaign_data.guaranteed_name}}</span></p>
+								<span v-else-if="device_campaign_data.guaranteed_name != null">Guaranteed: {{device_campaign_data.guaranteed_name}}</span>
+								<span>Filler</span>
+								</p>
 								<span class="deep-purple--text">played {{moment(device_campaign_data.play_start_time).fromNow()}}</span>
 							</div>
 						</v-col>
@@ -221,6 +223,20 @@
 						<v-col cols="12" v-if="device_geo_datas.length > 0">
 							<l-map style="height: 350px" :zoom="16" :center="device_center">
 								<l-tile-layer :url="'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'"></l-tile-layer>
+								<div v-if="device_geo_fences.length > 0">
+									<div v-for="fence in device_geo_fences" :key="fence.id">
+										<div v-if="fence.radius == null">
+											<l-polygon :lat-lngs="fence.points" :color="'green'"></l-polygon>
+										</div>
+										<div v-else>
+											<l-circle
+												:lat-lng="fence.points"
+												:radius="fence.radius"
+												:color="'green'"
+											/>
+										</div>
+									</div>
+								</div>
 								<div v-for="(geo, index) in device_geo_datas" :key="geo.play_start_time">
 									<div v-if="index==0">
 										<div v-if="checkDeviceOnline(geo.play_start_time)">
@@ -248,7 +264,13 @@
 							</v-btn>
 						</v-col>
 						<v-col cols="12" v-if="device_incident_data.length > 0">
-							
+							<v-simple-table dense>
+								<tbody>
+									<tr v-for="did in device_incident_data" :key="did.id">
+										<td>{{did.incident_time}}</td><td>{{did.type}}</td><td>{{did.description}}</td>
+									</tr>
+								</tbody>
+							</v-simple-table>
 						</v-col>
 						<v-col cols="12" v-if="incidentWarning">
 							<div class="caption red--text">
@@ -287,6 +309,22 @@
 							</template>
 							<span>Schedule</span>
 						</v-tooltip>
+						<v-tooltip top v-if="device_device_type == 'led'">
+							<template v-slot:activator="{ on, attrs }">
+								<v-btn text v-bind="attrs" v-on="on" @click="uploadApp()">
+									<v-icon large color="orange darken-2">mdi-upload</v-icon>
+								</v-btn>
+							</template>
+							<span>Upload App</span>
+						</v-tooltip>
+					</v-row>
+					<v-row v-if="device_device_type == 'led'">
+						<v-col cols="12">
+							<v-text-field
+								v-model="appUrl"
+								label="this input only for upload app"
+							></v-text-field>
+						</v-col>
 					</v-row>
 				</v-card-text>
 			</v-tab-item>
@@ -298,7 +336,7 @@
 </template>
 <script>
 import L from 'leaflet';
-import { LMap, LTileLayer, LMarker, LIcon, LTooltip } from 'vue2-leaflet';
+import { LMap, LTileLayer, LMarker, LIcon, LTooltip, LPolygon, LCircle } from 'vue2-leaflet';
 var moment = require('moment');
 export default{
 	data(){
@@ -317,6 +355,7 @@ export default{
 
 			//maps=========
 			device_geo_datas: [],
+			device_geo_fences: [],
 			device_center: [-7.273119, 112.742891],
 			lastIconOnline: L.icon({
 				iconUrl: this.$store.state.apiUrl+'public/img/maps/blue.webp',
@@ -346,6 +385,8 @@ export default{
 			incidentWarning: false,
 			//=============
 
+			appUrl : "",
+
 			screen_types: [{text:'All',value:''},{text:'Led',value:'led'},{text:'Screen',value:'screen'}],
 			monitor_status: [{text:'All',value:''},{text:'Wake',value:'wake'},{text:'Sleep',value:'sleep'}],
 			online_status: [{text:'All',value:0},{text:'Online',value:1},{text:'Offline',value:2}],
@@ -364,7 +405,9 @@ export default{
 		LTileLayer,
 		LMarker,
 		LIcon,
-		LTooltip
+		LTooltip,
+		LPolygon,
+		LCircle
 	},
 	mounted(){
 		this.loadData();
@@ -400,11 +443,30 @@ export default{
 			if(datas.length > 0){
 				if(datas[0].lat == 0){
 					this.device_geo_datas = [];
+					this.device_geo_fences = [];
 					this.geoWarning = true;
 				}else{
 					this.geoWarning = false;
 					this.device_center = [datas[0].lat, datas[0].lng];
 					this.device_geo_datas = res.datas;
+					let gfs = res.geofences;
+					for(let h=0; h<gfs.length; h++){
+						let pts = JSON.parse(gfs[h]['points']);
+						let tmpArr = [];
+						if(gfs[h]['radius'] == null){
+							for(let i=0; i<pts.length; i++){
+								let tmpArr2 = [];
+								tmpArr2.push(pts[i]['lat']);
+								tmpArr2.push(pts[i]['lng']);
+								tmpArr.push(tmpArr2);
+							}
+						}else{
+							tmpArr.push(pts['lat']);
+							tmpArr.push(pts['lng']);
+						}
+						gfs[h]['points'] = tmpArr;
+					}
+					this.device_geo_fences = gfs;
 				}
 			}
 		},
@@ -426,7 +488,7 @@ export default{
 				this.incidentWarning = true;
 			}else{
 				this.incidentWarning = false;
-				this.device_incident_data = data;
+				this.device_incident_data = datas;
 			}
 		},
 		checkDeviceOnline: function(tm){
@@ -449,9 +511,10 @@ export default{
 			this.device = {};
 			this.device_device_type = "led";
 			this.device_geo_datas = [];
+			this.device_geo_fences = [];
 			this.device_center= [-7.273119, 112.742891];
 			this.device_campaign_data = null;
-			this.device_incident_warning = null;
+			this.device_incident_data = [];
 			this.dialog = false;
 			this.geoWarning = false;
 			this.campaignWarning = false;
@@ -465,6 +528,20 @@ export default{
 					status: status
 				}
 				let res = await this.$store.dispatch('device/operationalSetStatus', payload);
+			}
+		},
+		uploadApp: async function(){
+			if(this.appUrl == ""){
+				alert("Need the App URL!");
+			}else{
+				if(confirm("Yakin akan melakukan upload app pada device ini?")){
+					let payload = {
+						id: this.device.id,
+						url: this.appUrl,
+						status: status
+					}
+					let res = await this.$store.dispatch('device/operationalAppUpload', payload);
+				}
 			}
 		},
 		getSignalIcon: function(net,mode,online_status){
