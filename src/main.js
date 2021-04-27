@@ -11,7 +11,7 @@ import 'leaflet/dist/leaflet.css';
 
 //for notification
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('firebase-messaging-sw.js')
+  navigator.serviceWorker.register('/public/monitoring/firebase-messaging-sw.js')
     .then(reg => {
       console.log(`Service Worker Registration (Scope: ${reg.scope})`);
     })
@@ -32,9 +32,6 @@ firebaseMessaging.getToken({vapidKey:"BOY5UBH9dbCVDVhZN1qno8OxGHb4FQjwae5Zr5Dire
   });
   console.log(token);
 })
-
-Vue.prototype.$messaging = firebaseMessaging
-
 Vue.config.productionTip = false
 
 new Vue({

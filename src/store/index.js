@@ -14,7 +14,7 @@ const state = {
   user:null,
   loginDialog:false,
   activeMenu: "device-quick-info",
-  version: "1.081"
+  version: "1.082"
 };
 
 const mutations = {
