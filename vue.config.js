@@ -10,20 +10,18 @@ module.exports = {
     msTileColor: "#42b983",
     appleMobileWebAppCache: "yes",
     manifestOptions: {
-      background_color: "#42b983"
+      background_color: "#FFFFFF",
+      gcm_sender_id: "30195697440",
+      display: "fullscreen"
     },
-    manifestCrossorigin: 'use-credentials'/*,
+    manifestCrossorigin: 'use-credentials',
     workboxPluginMode: 'InjectManifest',
     workboxOptions: {
         // swSrc is required in InjectManifest mode.
         swSrc: 'src/service-worker.js',
         // ...other Workbox options...
     }
-    */
   },
-  publicPath: process.env.NODE_ENV === 'production'
-    ? '/public/monitoring'
-    : '/',
   outputDir: 'monitoring',
   devServer: {
     disableHostCheck: true,

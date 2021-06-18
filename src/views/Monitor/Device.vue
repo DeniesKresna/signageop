@@ -186,7 +186,9 @@
 						</v-col>
 						<v-col cols="12" v-else>
 							<div class="subtitle-2">
-								Merchant: {{device.merchant_name}} ({{device.merchant_phone}})<br />
+								Merchant: {{device.merchant_name}} (
+									<span v-if="device.merchant_phone != null">{{device.merchant_phone}}</span>
+								)<br />
 							</div>
 						</v-col>
 						<!----------------------------- Campaign Data ------------------------------------>
@@ -303,7 +305,7 @@
 						</v-tooltip>
 						<v-tooltip top>
 							<template v-slot:activator="{ on, attrs }">
-								<v-btn text v-bind="attrs" v-on="on" @click="goTo('https://api.signage.co.id/api/v1/device/listlayout?imei='+ device.imei +'&date='+new Date().toISOString().slice(0,10)+'&hour='+new Date().getHours())">
+								<v-btn text v-bind="attrs" v-on="on" @click="goTo('https://api.signage.co.id/api/v1/device/listlayout?imei='+ device.imei_device +'&date='+new Date().toISOString().slice(0,10)+'&hour='+new Date().getHours())">
 									<v-icon large color="purple darken-2">mdi-calendar-month-outline</v-icon>
 								</v-btn>
 							</template>
