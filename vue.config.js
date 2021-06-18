@@ -22,7 +22,7 @@ module.exports = {
         // ...other Workbox options...
     }
   },
-  outputDir: 'monitoring',
+  outputDir: 'build',
   devServer: {
     disableHostCheck: true,
     
