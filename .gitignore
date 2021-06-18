@@ -3,6 +3,7 @@ node_modules
 certs
 /dist
 
+vue.config.js
 
 # local env files
 .env.local
