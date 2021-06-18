@@ -2,8 +2,10 @@
 node_modules
 certs
 /dist
+/build
 
 vue.config.js
+firebase.messaging.sw-js
 
 # local env files
 .env.local
